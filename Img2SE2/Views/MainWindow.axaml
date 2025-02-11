@@ -1,0 +1,43 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Img2SE2.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Img2SE2.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        SizeToContent="WidthAndHeight"
+        Title="Img2SE2">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="Button">
+            <Setter Property="Width" Value="256"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+    </Window.Styles>
+    
+    <StackPanel>
+        <Grid ColumnDefinitions="Auto Auto" RowDefinitions="Auto">
+            <Image Margin="32" Width="360" Height="360" Source="{Binding SourceImage}"/>
+            <StackPanel Grid.Column="1" Margin="32" Spacing="20">
+                <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                
+                <CheckBox Content="Use Detail Block?" IsChecked="{Binding UseDetailBlock}"></CheckBox>
+                
+                <Button Content="Pick a Image" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding PickImageCommand}"/>
+                <Button Content="Convert Image" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding ConvertImageCommand}"/>
+                <Button Content="Convert With Height Map" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding ConvertImageHeightMapCommand}"/>
+            </StackPanel>
+        </Grid>
+
+    </StackPanel>
+
+
+</Window>
