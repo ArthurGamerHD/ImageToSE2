@@ -24,17 +24,22 @@
     </Window.Styles>
     
     <StackPanel>
-        <Grid ColumnDefinitions="Auto Auto" RowDefinitions="Auto">
-            <Image Margin="32" Width="360" Height="360" Source="{Binding SourceImage}"/>
-            <StackPanel Grid.Column="1" Margin="32" Spacing="20">
+        <Grid ColumnDefinitions="Auto Auto" RowDefinitions="Auto Auto">
+            <Border Margin="28" Padding="2" CornerRadius="3" Grid.RowSpan="2" BorderThickness="2" 
+                    BorderBrush="{Binding #PickButton.Background}">
+                <Image  Width="360" Height="360" Source="{Binding SourceImage}"/>
+            </Border>
+            <StackPanel Grid.Row="0" Grid.Column="1" Margin="32" Spacing="20">
                 <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 
                 <CheckBox Content="Use Detail Block?" IsChecked="{Binding UseDetailBlock}"></CheckBox>
                 
-                <Button Content="Pick a Image" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding PickImageCommand}"/>
-                <Button Content="Convert Image" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding ConvertImageCommand}"/>
-                <Button Content="Convert With Height Map" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding ConvertImageHeightMapCommand}"/>
+                <Button x:Name="PickButton" Content="Pick a Image" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding PickImageCommand}"/>
+                <Button x:Name="ConvertButton" Content="Convert Image" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding ConvertImageCommand}"/>
+                <Button x:Name="ConvertButtonHeight" Content="Convert With Height Map" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding ConvertImageHeightMapCommand}"/>
             </StackPanel>
+            
+            <ProgressBar Margin="32" Grid.Row="1" Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding Working}"/>
         </Grid>
 
     </StackPanel>

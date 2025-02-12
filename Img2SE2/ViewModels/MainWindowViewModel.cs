@@ -7,6 +7,7 @@ using System.Windows.Input;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -40,6 +41,20 @@ public partial class MainWindowViewModel : ViewModelBase
             ConvertImageCommand.IsEnabled = File != null;
             ConvertImageHeightMapCommand.IsEnabled = File != null;
             UpdatePreview();
+        }
+    }
+
+    public bool Working => _tasks > 0;
+
+    private int? _tasks = 0;
+
+    private int? Tasks
+    {
+        get => _tasks;
+        set
+        {
+            _tasks = value;
+            Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(Working))); 
         }
     }
 
@@ -124,6 +139,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
         try
         {
+            Tasks++;
+
             var colorData = await ConvertImageTo2DArray(_file);
 
             Rgba32[,]? heightMap = null;
@@ -146,6 +163,10 @@ public partial class MainWindowViewModel : ViewModelBase
             Console.WriteLine(e);
             throw;
         }
+        finally
+        {
+            Tasks--;
+        }
     }
     
     public async void ConvertImage()
@@ -155,10 +176,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
         try
         {
+            Tasks++;
+
             var colorData = await ConvertImageTo2DArray(_file);
 
             var app = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            
+
             await using var textFile = System.IO.File.CreateText(
                 Path.Combine(app, $"SpaceEngineers2\\AppData\\SE1GridsToImport\\{File?.Name ?? "image"}.txt"));
 
@@ -172,6 +195,10 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             Console.WriteLine(e);
             throw;
+        }
+        finally
+        {
+            Tasks--;
         }
     }
 
