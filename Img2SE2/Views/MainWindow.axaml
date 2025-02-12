@@ -6,43 +6,59 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Img2SE2.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
+        Width="800"
+        Height="600"
         Icon="/Assets/avalonia-logo.ico"
-        SizeToContent="WidthAndHeight"
         Title="Img2SE2">
 
     <Design.DataContext>
-        <vm:MainWindowViewModel/>
+        <vm:MainWindowViewModel />
     </Design.DataContext>
 
     <Window.Styles>
         <Style Selector="Button">
-            <Setter Property="Width" Value="256"/>
-            <Setter Property="Height" Value="32"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Width" Value="256" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
         </Style>
     </Window.Styles>
-    
-    <StackPanel>
-        <Grid ColumnDefinitions="Auto Auto" RowDefinitions="Auto Auto">
-            <Border Margin="28" Padding="2" CornerRadius="3" Grid.RowSpan="2" BorderThickness="2" 
-                    BorderBrush="{Binding #PickButton.Background}">
-                <Image  Width="360" Height="360" Source="{Binding SourceImage}"/>
-            </Border>
-            <StackPanel Grid.Row="0" Grid.Column="1" Margin="32" Spacing="20">
-                <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                
-                <CheckBox Content="Use Detail Block?" IsChecked="{Binding UseDetailBlock}"></CheckBox>
-                
-                <Button x:Name="PickButton" Content="Pick a Image" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding PickImageCommand}"/>
-                <Button x:Name="ConvertButton" Content="Convert Image" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding ConvertImageCommand}"/>
-                <Button x:Name="ConvertButtonHeight" Content="Convert With Height Map" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding ConvertImageHeightMapCommand}"/>
-            </StackPanel>
-            
-            <ProgressBar Margin="32" Grid.Row="1" Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding Working}"/>
+
+
+    <Grid ColumnDefinitions="Auto * Auto" RowDefinitions="Auto 16 *">
+        <Border Margin="28" Padding="2" VerticalAlignment="Center" HorizontalAlignment="Center"
+                CornerRadius="3" Grid.RowSpan="2" BorderThickness="2"
+                BorderBrush="{Binding #PickButton.Background}">
+            <Image Width="360" Height="360" Source="{Binding SourceImage}" />
+        </Border>
+        <StackPanel Grid.Row="0" Grid.Column="2" Margin="32" Spacing="20">
+            <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+            <CheckBox Content="Use Detail Block?" IsChecked="{Binding UseDetailBlock}"></CheckBox>
+
+            <Button x:Name="PickButton" Content="Pick a Image" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Command="{Binding PickImageCommand}" />
+            <Button x:Name="ConvertButton" Content="Convert Image" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Command="{Binding ConvertImageCommand}" />
+            <Button x:Name="ConvertButtonHeight" Content="Convert With Height Map" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Command="{Binding ConvertImageHeightMapCommand}" />
+        </StackPanel>
+
+
+        <ProgressBar Margin="32" Grid.Row="1" Grid.Column="2" IsIndeterminate="True" IsVisible="{Binding Working}" />
+        <Grid Row="2" ColumnSpan="3" Column="0" Margin="28">
+            <TextBox x:Name="MessageBox"
+                     Text="{Binding Message}"
+                     BorderBrush="{Binding #PickButton.Background}" BorderThickness="1"
+                     TextWrapping="Wrap" IsReadOnly="True"
+                     VerticalAlignment="Stretch"
+                     ScrollViewer.VerticalScrollBarVisibility="Visible"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     MaxWidth="{Binding $parent.Bounds.Width}"
+                     MaxHeight="{Binding $parent.Bounds.Height}" />
         </Grid>
 
-    </StackPanel>
 
+    </Grid>
 
 </Window>

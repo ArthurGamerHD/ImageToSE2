@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -58,6 +59,10 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private StringBuilder _message = new();
+    
+    public string Message => _message.ToString();
+
     private IStorageFile? _file;
     private List<FilePickerFileType> _fileTypeFilter;
 
@@ -67,6 +72,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ConvertImageCommand = new SimpleCommand(ConvertImage) { IsEnabled = false };
         ConvertImageHeightMapCommand = new SimpleCommand(ConvertImageHeightMap) { IsEnabled = false };
 
+        _message.AppendLine("Welcome to Image to SE2");
 
         _fileTypeFilter = new List<FilePickerFileType>
         {
@@ -132,6 +138,12 @@ public partial class MainWindowViewModel : ViewModelBase
         return null;
     }
 
+    string GetNewBlueprintFilePath(string? name = null)
+    {
+        var app = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        return Path.Combine(app, $"SpaceEngineers2\\AppData\\SE1GridsToImport\\{name ?? "image"}.txt");
+    }
+
     public async void ConvertImageHeightMap()
     {
         if (_file == null)
@@ -149,19 +161,21 @@ public partial class MainWindowViewModel : ViewModelBase
                 heightMap = await ConvertImageTo2DArray(mask, colorData.GetLength(1), colorData.GetLength(0));
             }
 
-            await using var textFile = System.IO.File.CreateText(
-                $"C:\\Users\\Arthur\\AppData\\Roaming\\SpaceEngineers2\\AppData\\SE1GridsToImport\\{File?.Name ?? "image"}.txt");
+            var path = GetNewBlueprintFilePath(File?.Name);
+            await using var textFile = System.IO.File.CreateText(path);
 
             var pattern = UseDetailBlock ? DETAIL_GRID : SMALL_GRID;
             var multiplier = UseDetailBlock ? DETAIL_GRID_MULTIPLIER : SMALL_GRID_MULTIPLIER;
 
             foreach (var line in ConvertArrayToBlocks(colorData, pattern, multiplier, heightMap))
                 await textFile.WriteLineAsync(line);
+            
+            WriteMessage("Blueprint generated successfully");
+            WriteMessage($"Path: {path}");
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw;
+            WriteMessage(e.Message);
         }
         finally
         {
@@ -182,19 +196,21 @@ public partial class MainWindowViewModel : ViewModelBase
 
             var app = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
-            await using var textFile = System.IO.File.CreateText(
-                Path.Combine(app, $"SpaceEngineers2\\AppData\\SE1GridsToImport\\{File?.Name ?? "image"}.txt"));
+            var path = GetNewBlueprintFilePath(File?.Name);
+            await using var textFile = System.IO.File.CreateText(path);
 
             var pattern = UseDetailBlock ? DETAIL_GRID : SMALL_GRID;
             var multiplier = UseDetailBlock ? DETAIL_GRID_MULTIPLIER : SMALL_GRID_MULTIPLIER;
 
             foreach (var line in ConvertArrayToBlocks(colorData, pattern, multiplier))
                 await textFile.WriteLineAsync(line);
+            
+            WriteMessage("Blueprint generated successfully");
+            WriteMessage($"Path: {path}");
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw;
+            WriteMessage(e.Message);
         }
         finally
         {
@@ -237,5 +253,12 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         return array;
+    }
+
+    public void WriteMessage(string message)
+    {
+        Console.WriteLine(message);
+        _message.AppendLine(message);
+        Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(Message)));
     }
 }
