@@ -1,0 +1,86 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:lib="clr-namespace:Img2SE2.Lib">
+    <Design.PreviewWith>
+        <Border Padding="20" Background="{DynamicResource LogoBackgroundBrush}">
+            <Path Fill="{DynamicResource LogoForegroundBrush}" Width="32" Height="32" Data="{DynamicResource Logo}" />
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="Button">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <lib:BeveledBorder Name="PART_Border"
+                                   MinHeight="40"
+                                   BorderThickness="{TemplateBinding BorderThickness}"
+                                   Background="{TemplateBinding Background}"
+                                   BorderBrush="{TemplateBinding BorderBrush}"
+                                   CornerRadius="{TemplateBinding CornerRadius}">
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      Padding="{TemplateBinding Padding}"
+                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                </lib:BeveledBorder>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="Button">
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="MinHeight" Value="40" />
+        <Setter Property="MinWidth" Value="42" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Background" Value="{DynamicResource Button-Background}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Button-Stroke}" />
+        <Setter Property="Foreground" Value="{DynamicResource Button-Text}" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="BorderThickness" Value="1" />
+
+        <!-- Pseudo-Classes -->
+
+        <!-- Focus -->
+        <Style Selector="^:focus, ^:pointerover, ^:flyout-open">
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource Button-Text-Focus}" />
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+
+            <Style Selector="^ /template/ lib|BeveledBorder#PART_Border">
+                <Setter Property="Background" Value="{DynamicResource Button-Background-Focus}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource Button-Stroke-Focus}" />
+            </Style>
+        </Style>
+
+        <!-- Disabled -->
+        <Style Selector="^:disabled">
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource Button-Text-Disabled}" />
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+
+            <Style Selector="^ /template/ lib|BeveledBorder#PART_Border">
+                <Setter Property="Background" Value="{DynamicResource Button-Background-Disabled}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource Button-Stroke-Disabled}" />
+            </Style>
+        </Style>
+
+        <!-- Active -->
+        <Style Selector="^:pressed">
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource Button-Text-Active}" />
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+            <Style Selector="^ /template/ lib|BeveledBorder#PART_Border">
+                <Setter Property="Background" Value="{DynamicResource Button-Background-Active}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource Button-Stroke-Active}" />
+            </Style>
+        </Style>
+    </Style>
+</Styles>

@@ -1,9 +1,12 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
+using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Markup.Xaml.Styling;
 using Img2SE2.ViewModels;
 using Img2SE2.Views;
 
@@ -34,14 +37,17 @@ public partial class App : Application
 
     private void DisableAvaloniaDataAnnotationValidation()
     {
+#pragma warning disable IL2026
         // Get an array of plugins to remove
         var dataValidationPluginsToRemove =
             BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
+
 
         // remove each entry found
         foreach (var plugin in dataValidationPluginsToRemove)
         {
             BindingPlugins.DataValidators.Remove(plugin);
         }
+#pragma warning restore IL2026
     }
 }

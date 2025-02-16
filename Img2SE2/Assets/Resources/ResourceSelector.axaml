@@ -1,0 +1,17 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key='Light'>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="Shared.axaml"/>
+                <ResourceInclude Source="Light.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key='Dark'>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="Shared.axaml"/>
+                <ResourceInclude Source="Dark.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

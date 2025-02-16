@@ -9,6 +9,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using Img2SE2.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -18,14 +19,10 @@ namespace Img2SE2.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     //{X}|{Y}|{Z}|{HUE}|{Saturation}|{Value}
-    public const string SMALL_GRID = "632d7385-12b9-47a6-802a-a610d0cbd1e0|{0}|{1}|{2}|{3}|{4}|{5}|0|4|1|";
-    public const string DETAIL_GRID = "6c5ed351-0868-40c8-9cf3-3dd9bc201f46|{0}|{1}|{2}|{3}|{4}|{5}|0|4|1|";
-    public const int SMALL_GRID_MULTIPLIER = 2;
-    public const int DETAIL_GRID_MULTIPLIER = 1;
 
     public bool UseDetailBlock { get; set; } = true;
 
-    public string Greeting => "Image to Ship Converter SE2";
+    public string Greeting => "Image to Space Engineers 2";
 
     public SimpleCommand PickImageCommand { get; }
     public SimpleCommand ConvertImageCommand { get; }
@@ -62,6 +59,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private StringBuilder _message = new();
     
     public string Message => _message.ToString();
+    public BlockSize[] BlockSizes { get; } = [BlockSize.Detailing, BlockSize.Small, BlockSize.Large];
+    public BlockSize SelectedSize { get; set; } = BlockSize.Detailing;
 
     private IStorageFile? _file;
     private List<FilePickerFileType> _fileTypeFilter;
@@ -72,7 +71,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ConvertImageCommand = new SimpleCommand(ConvertImage) { IsEnabled = false };
         ConvertImageHeightMapCommand = new SimpleCommand(ConvertImageHeightMap) { IsEnabled = false };
 
-        _message.AppendLine("Welcome to Image to SE2");
+        _message.AppendLine("Welcome to Image to Space Engineers 2");
 
         _fileTypeFilter = new List<FilePickerFileType>
         {
@@ -163,11 +162,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
             var path = GetNewBlueprintFilePath(File?.Name);
             await using var textFile = System.IO.File.CreateText(path);
+            
 
-            var pattern = UseDetailBlock ? DETAIL_GRID : SMALL_GRID;
-            var multiplier = UseDetailBlock ? DETAIL_GRID_MULTIPLIER : SMALL_GRID_MULTIPLIER;
-
-            foreach (var line in ConvertArrayToBlocks(colorData, pattern, multiplier, heightMap))
+            foreach (var line in ConvertArrayToBlocks(colorData, SelectedSize, heightMap))
                 await textFile.WriteLineAsync(line);
             
             WriteMessage("Blueprint generated successfully");
@@ -193,16 +190,12 @@ public partial class MainWindowViewModel : ViewModelBase
             Tasks++;
 
             var colorData = await ConvertImageTo2DArray(_file);
-
-            var app = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
+            
             var path = GetNewBlueprintFilePath(File?.Name);
             await using var textFile = System.IO.File.CreateText(path);
+            
 
-            var pattern = UseDetailBlock ? DETAIL_GRID : SMALL_GRID;
-            var multiplier = UseDetailBlock ? DETAIL_GRID_MULTIPLIER : SMALL_GRID_MULTIPLIER;
-
-            foreach (var line in ConvertArrayToBlocks(colorData, pattern, multiplier))
+            foreach (var line in ConvertArrayToBlocks(colorData, SelectedSize))
                 await textFile.WriteLineAsync(line);
             
             WriteMessage("Blueprint generated successfully");
@@ -239,7 +232,7 @@ public partial class MainWindowViewModel : ViewModelBase
         return colors;
     }
 
-    static string[] ConvertArrayToBlocks(Rgba32[,] colors, string pattern, int multiplier, Rgba32[,]? heightMap = null)
+    static string[] ConvertArrayToBlocks(Rgba32[,] colors, BlockSize selectedBlock, Rgba32[,]? heightMap = null)
     {
         var array = new string[colors.Length];
 
@@ -248,8 +241,15 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             var color = new ColorHSV(colors[y, x]);
             var z = heightMap != null && new ColorHSV(heightMap[y, x]).Value > 0.5 ? 1 : 0;
-            array[y * colors.GetLength(1) + x] = String.Format(pattern, x * multiplier,
-                y * multiplier, z * multiplier, color.Hue, color.Saturation, color.Value);
+            array[y * colors.GetLength(1) + x] = 
+                String.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|0|4|1|", 
+                selectedBlock.GUID, 
+                x * selectedBlock.Size,
+                y * selectedBlock.Size, 
+                z * selectedBlock.Size, 
+                color.Hue, 
+                color.Saturation, 
+                color.Value);
         }
 
         return array;

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="Img2SE2/App.axaml" value="Img2SE2/Img2SE2.csproj" />
+        <entry key="Img2SE2/Assets/Resources/Dark.axaml" value="Img2SE2/Img2SE2.csproj" />
+        <entry key="Img2SE2/Assets/Resources/Light.axaml" value="Img2SE2/Img2SE2.csproj" />
+        <entry key="Img2SE2/Assets/Resources/Main.axaml" value="Img2SE2/Img2SE2.csproj" />
+        <entry key="Img2SE2/Assets/Resources/Merged.axaml" value="Img2SE2/Img2SE2.csproj" />
+        <entry key="Img2SE2/Assets/Styles/BaseStyles.axaml" value="Img2SE2/Img2SE2.csproj" />
+        <entry key="Img2SE2/Assets/Styles/Buttons.axaml" value="Img2SE2/Img2SE2.csproj" />
+        <entry key="Img2SE2/Views/BeveledBorders.axaml" value="Img2SE2/Img2SE2.csproj" />
+        <entry key="Img2SE2/Views/MainWindow.axaml" value="Img2SE2/Img2SE2.csproj" />
+      </map>
+    </option>
+  </component>
+</project>

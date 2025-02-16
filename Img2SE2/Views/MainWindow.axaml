@@ -3,11 +3,17 @@
         xmlns:vm="using:Img2SE2.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:lib="clr-namespace:Img2SE2.Lib"
+        xmlns:models="clr-namespace:Img2SE2.Models"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Img2SE2.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Width="800"
-        Height="600"
+        x:CompileBindings="True"
+        ExtendClientAreaToDecorationsHint="False"
+        Width="550"
+        Height="500"
+        MinWidth="550"
+        MinHeight="360"
         Icon="/Assets/avalonia-logo.ico"
         Title="Img2SE2">
 
@@ -15,38 +21,86 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Window.Styles>
-        <Style Selector="Button">
-            <Setter Property="Width" Value="256" />
-            <Setter Property="Height" Value="32" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-        </Style>
-    </Window.Styles>
+    <Grid ColumnSpan="3" Row="1">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition MinHeight="266" />
+            <RowDefinition Height="3" />
+            <RowDefinition MinHeight="80" />
+        </Grid.RowDefinitions>
+
+        <Grid RowDefinitions="Auto" ColumnSpan="3" ColumnDefinitions="* Auto *" Margin="-48 0">
+            <lib:HazardStripes Grid.Column="0" Height="34"
+                               VerticalAlignment="Top"
+                               LineAngle="-45"
+                               Mirrored="True"
+                               Foreground="{StaticResource Highlight}" />
+
+            <lib:BeveledBorder Grid.Row="0" Grid.Column="1" Margin="24 0" Padding="32 4" CornerRadius="0 0 32 32"
+                               Background="{StaticResource Highlight}">
+                <TextBlock Text="{Binding Greeting}" FontSize="18" HorizontalAlignment="Center"
+                           Foreground="{DynamicResource Black}"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center" />
+            </lib:BeveledBorder>
+
+            <lib:HazardStripes Grid.Row="0" Grid.Column="2" Height="34"
+                               VerticalAlignment="Top"
+                               LineAngle="-45"
+                               Foreground="{StaticResource Highlight}" />
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnDefinitions="* 16 Auto" Margin="28 8">
+            <Viewbox HorizontalAlignment="Left" VerticalAlignment="Top">
+                <lib:BeveledBorder Padding="6"
+                                   CornerRadius="8" BorderThickness="2"
+                                   BorderBrush="{Binding #PickButton.Background}">
+
+                    <Grid>
+                        <Image Stretch="Uniform" MinWidth="360" MinHeight="360"
+                               Source="{Binding SourceImage}" />
+                        <Path Fill="{DynamicResource LogoForegroundBrush}"
+                              IsVisible="{Binding SourceImage, Converter={x:Static ObjectConverters.IsNull}}"
+                              Width="128" Height="128"
+                              VerticalAlignment="Stretch"
+                              HorizontalAlignment="Stretch"
+                              Stretch="UniformToFill"
+                              Data="{DynamicResource LogoShape}" />
+                    </Grid>
+
+                </lib:BeveledBorder>
+            </Viewbox>
+
+            <Grid Grid.Column="2" RowDefinitions="* Auto" MinWidth="232">
+                <StackPanel Margin="0 8" Spacing="20">
+                    <Button x:Name="PickButton" Content="Pick a Image"
+                            VerticalAlignment="Center" Command="{Binding PickImageCommand}" />
+                    <Button x:Name="ConvertButton" Content="Convert Image"
+                            VerticalAlignment="Center" Command="{Binding ConvertImageCommand}" />
+                    <Button x:Name="ConvertButtonHeight" Content="Convert With Height Map"
+                            VerticalAlignment="Center" Command="{Binding ConvertImageHeightMapCommand}" />
+                    
+                    <ComboBox ItemsSource="{Binding BlockSizes}" 
+                              HorizontalAlignment="Stretch"
+                              SelectedItem="{Binding SelectedSize}">
+                        <ComboBox.DataTemplates>
+                            <DataTemplate x:DataType="models:BlockSize">
+                                <AccessText Text="{Binding Name}"/>
+                            </DataTemplate>
+                        </ComboBox.DataTemplates>
+                    </ComboBox>
+
+                </StackPanel>
+                <ProgressBar Margin="16 0" Grid.Row="1" IsIndeterminate="True" IsVisible="{Binding Working}" />
+            </Grid>
 
 
-    <Grid ColumnDefinitions="Auto * Auto" RowDefinitions="Auto 16 *">
-        <Border Margin="28" Padding="2" VerticalAlignment="Center" HorizontalAlignment="Center"
-                CornerRadius="3" Grid.RowSpan="2" BorderThickness="2"
-                BorderBrush="{Binding #PickButton.Background}">
-            <Image Width="360" Height="360" Source="{Binding SourceImage}" />
-        </Border>
-        <StackPanel Grid.Row="0" Grid.Column="2" Margin="32" Spacing="20">
-            <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
 
-            <CheckBox Content="Use Detail Block?" IsChecked="{Binding UseDetailBlock}"></CheckBox>
+        <GridSplitter Grid.Row="2" Grid.Column="0" Cursor="SizeNorthSouth" />
 
-            <Button x:Name="PickButton" Content="Pick a Image" HorizontalAlignment="Center"
-                    VerticalAlignment="Center" Command="{Binding PickImageCommand}" />
-            <Button x:Name="ConvertButton" Content="Convert Image" HorizontalAlignment="Center"
-                    VerticalAlignment="Center" Command="{Binding ConvertImageCommand}" />
-            <Button x:Name="ConvertButtonHeight" Content="Convert With Height Map" HorizontalAlignment="Center"
-                    VerticalAlignment="Center" Command="{Binding ConvertImageHeightMapCommand}" />
-        </StackPanel>
-
-
-        <ProgressBar Margin="32" Grid.Row="1" Grid.Column="2" IsIndeterminate="True" IsVisible="{Binding Working}" />
-        <Grid Row="2" ColumnSpan="3" Column="0" Margin="28">
+        <Grid Row="3" Column="0" Margin="28 0 28 32">
             <TextBox x:Name="MessageBox"
                      Text="{Binding Message}"
                      BorderBrush="{Binding #PickButton.Background}" BorderThickness="1"
@@ -57,8 +111,6 @@
                      MaxWidth="{Binding $parent.Bounds.Width}"
                      MaxHeight="{Binding $parent.Bounds.Height}" />
         </Grid>
-
-
     </Grid>
 
 </Window>
