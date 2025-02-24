@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Collections;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
@@ -37,22 +38,15 @@ public partial class MainWindowViewModel : ViewModelBase
         set
         {
             _file = value;
-            OnImageSelected();
+            ScheduleTask(OnImageSelected);
         }
     }
 
-    public bool Working => _tasks > 0;
-
-    private int? _tasks = 0;
+    public bool Working => Tasks > 0;
 
     private int? Tasks
     {
-        get => _tasks;
-        set
-        {
-            _tasks = value;
-            Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(Working)));
-        }
+        get => _tasks.Count;
     }
 
     private StringBuilder _message = new();
@@ -64,11 +58,14 @@ public partial class MainWindowViewModel : ViewModelBase
     private IStorageFile? _file;
     private List<FilePickerFileType> _fileTypeFilter;
 
+    private AvaloniaList<Task> _tasks = new();
+
     public MainWindowViewModel()
     {
         PickImageCommand = new SimpleCommand(PickImage);
-        ConvertImageCommand = new SimpleCommand(ConvertImage) { IsEnabled = false };
-        ConvertImageHeightMapCommand = new SimpleCommand(ConvertImageHeightMap) { IsEnabled = false };
+        ConvertImageCommand = new SimpleCommand(() => ScheduleTask(ConvertImage)) { IsEnabled = false };
+        ConvertImageHeightMapCommand = new SimpleCommand(() => ScheduleTask(ConvertImageHeightMap))
+            { IsEnabled = false };
 
         _message.AppendLine("Welcome to Image to Space Engineers 2");
 
@@ -101,17 +98,35 @@ public partial class MainWindowViewModel : ViewModelBase
         };
     }
 
-    private async void OnImageSelected()
+    private void ScheduleTask(Func<Task> func)
     {
-        Tasks++;
-
-        try
+        var task = Task.Run(func);
+        _tasks.Add(task);
+        task.ContinueWith(t =>
         {
-            ConvertImageCommand.IsEnabled = File != null;
-
-            if (File?.Path.AbsolutePath is { } path)
+            if (t.IsFaulted)
             {
-                var info = await Image.IdentifyAsync(path);
+                WriteMessage($"Exception occurred: {t.Exception.Message}");
+            }
+
+            _tasks.Remove(task);
+
+            Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(Working)));
+        });
+
+        OnPropertyChanged(nameof(Working));
+    }
+
+
+    private async Task OnImageSelected()
+    {
+        Dispatcher.UIThread.InvokeAsync(() => ConvertImageCommand.IsEnabled = File != null);
+
+        if (File?.Path.AbsolutePath is { } path)
+        {
+            var info = await Image.IdentifyAsync(path);
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
                 HasMultiFrames = info.FrameMetadataCollection.Count > 1;
                 ConvertImageHeightMapCommand.IsEnabled = !HasMultiFrames;
                 if (HasMultiFrames)
@@ -119,21 +134,17 @@ public partial class MainWindowViewModel : ViewModelBase
                     WriteMessage("Multi-Frame Image detected, using 3D image converter");
                     WriteMessage("Height Map is not supported using this configuration");
                 }
-            }
-            else
-            {
-                HasMultiFrames = false;
-            }
-
-            UpdatePreview();
+            });
         }
-        finally
+        else
         {
-            Tasks--;
+            Dispatcher.UIThread.InvokeAsync(() => HasMultiFrames = false);
         }
+
+        await UpdatePreview();
     }
 
-    public async void UpdatePreview()
+    public async Task UpdatePreview()
     {
         try
         {
@@ -156,7 +167,7 @@ public partial class MainWindowViewModel : ViewModelBase
                     SourceImage = new Bitmap(stream);
                 }
 
-                OnPropertyChanged(nameof(SourceImage));
+                Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(SourceImage)));
             }
         }
         catch (Exception e)
@@ -193,15 +204,15 @@ public partial class MainWindowViewModel : ViewModelBase
         return Path.Combine(app, $"SpaceEngineers2\\AppData\\SE1GridsToImport\\{name ?? "image"}.txt");
     }
 
-    public async void ConvertImageHeightMap()
+    public async Task ConvertImageHeightMap()
     {
         if (_file == null)
             throw new FileNotFoundException();
 
+        WriteMessage("Converting image with height map...");
+        
         try
         {
-            Tasks++;
-
             var stream = await _file.OpenReadAsync();
             using Image<Rgba32> image = Image.Load<Rgba32>(stream);
             var colorData = ConvertImageTo2DArray(image);
@@ -228,20 +239,17 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             WriteMessage(e.Message);
         }
-        finally
-        {
-            Tasks--;
-        }
     }
 
-    public async void ConvertImage()
+    public async Task ConvertImage()
     {
         if (_file == null)
             throw new FileNotFoundException();
 
+        WriteMessage("Converting image...");
+        
         try
         {
-            Tasks++;
             var stream = await _file.OpenReadAsync();
             using Image<Rgba32> image = Image.Load<Rgba32>(stream);
 
@@ -272,10 +280,6 @@ public partial class MainWindowViewModel : ViewModelBase
         catch (Exception e)
         {
             WriteMessage(e.Message);
-        }
-        finally
-        {
-            Tasks--;
         }
     }
 
@@ -348,7 +352,7 @@ public partial class MainWindowViewModel : ViewModelBase
         for (int z = 0; z < colors.GetLength(2); z++)
         {
             var color = new ColorHSV(colors[y, x, z]);
-            array[y * colors.GetLength(1) + x] =
+            array[z * colors.GetLength(0) * colors.GetLength(1) + y * colors.GetLength(1) + x] =
                 String.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|0|4|1|",
                     selectedBlock.GUID,
                     x * selectedBlock.Size,
