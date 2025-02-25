@@ -120,12 +120,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private async Task OnImageSelected()
     {
-        Dispatcher.UIThread.InvokeAsync(() => ConvertImageCommand.IsEnabled = File != null);
+        await Dispatcher.UIThread.InvokeAsync(() => ConvertImageCommand.IsEnabled = File != null);
 
         if (File?.Path.AbsolutePath is { } path)
         {
             var info = await Image.IdentifyAsync(path);
-            Dispatcher.UIThread.InvokeAsync(() =>
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 HasMultiFrames = info.FrameMetadataCollection.Count > 1;
                 ConvertImageHeightMapCommand.IsEnabled = !HasMultiFrames;
@@ -138,7 +138,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         else
         {
-            Dispatcher.UIThread.InvokeAsync(() => HasMultiFrames = false);
+            await Dispatcher.UIThread.InvokeAsync(() => HasMultiFrames = false);
         }
 
         await UpdatePreview();
@@ -255,24 +255,32 @@ public partial class MainWindowViewModel : ViewModelBase
 
             var path = GetNewBlueprintFilePath(File?.Name);
 
+            string[] pixels;
+            
             if (image.Frames.Count > 1)
             {
                 var colorData = ConvertImageTo3DArray(image);
-
-                await using var textFile = System.IO.File.CreateText(path);
-
-                foreach (var line in Convert3DArrayToBlocks(colorData, SelectedSize))
-                    await textFile.WriteLineAsync(line);
+                pixels = Convert3DArrayToBlocks(colorData, SelectedSize);
             }
             else
             {
                 var colorData = ConvertImageTo2DArray(image);
-
-                await using var textFile = System.IO.File.CreateText(path);
-
-                foreach (var line in Convert2DArrayToBlocks(colorData, SelectedSize))
-                    await textFile.WriteLineAsync(line);
+                pixels = Convert2DArrayToBlocks(colorData, SelectedSize);
             }
+            
+            await using var textFile = System.IO.File.CreateText(path);
+
+            var blocks = pixels.Where(a => !string.IsNullOrEmpty(a)).ToArray();
+
+            WriteMessage($"{blocks.Length} Blocks generated");
+
+            if (blocks.Length >= 400000)
+                PCUWarning();
+                
+
+            foreach (var line in pixels)
+                if(!string.IsNullOrEmpty(line))
+                    await textFile.WriteLineAsync(line);
 
             WriteMessage("Blueprint generated successfully");
             WriteMessage($"Path: {path}");
@@ -327,9 +335,17 @@ public partial class MainWindowViewModel : ViewModelBase
         for (int y = 0; y < colors.GetLength(0); y++)
         for (int x = 0; x < colors.GetLength(1); x++)
         {
+            var index = y * colors.GetLength(1) + x;
+            if (colors[y, x].A == 0)
+            {
+                // Skip empty pixels
+                array[index] = string.Empty;
+                continue;
+            }
+            
             var color = new ColorHSV(colors[y, x]);
             var z = heightMap != null && new ColorHSV(heightMap[y, x]).Value > 0.5 ? 1 : 0;
-            array[y * colors.GetLength(1) + x] =
+            array[index] =
                 String.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|0|4|1|",
                     selectedBlock.GUID,
                     x * selectedBlock.Size,
@@ -346,13 +362,21 @@ public partial class MainWindowViewModel : ViewModelBase
     static string[] Convert3DArrayToBlocks(Rgba32[,,] colors, BlockSize selectedBlock)
     {
         var array = new string[colors.Length];
-
+        
         for (int y = 0; y < colors.GetLength(0); y++)
         for (int x = 0; x < colors.GetLength(1); x++)
         for (int z = 0; z < colors.GetLength(2); z++)
         {
+            int index = z * colors.GetLength(0) * colors.GetLength(1) + y * colors.GetLength(1) + x;
+            if (colors[y, x, z].A == 0)
+            {
+                // Skip empty pixels
+                array[index] = string.Empty;
+                continue;
+            }
+            
             var color = new ColorHSV(colors[y, x, z]);
-            array[z * colors.GetLength(0) * colors.GetLength(1) + y * colors.GetLength(1) + x] =
+            array[index] =
                 String.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|0|4|1|",
                     selectedBlock.GUID,
                     x * selectedBlock.Size,
@@ -361,10 +385,22 @@ public partial class MainWindowViewModel : ViewModelBase
                     color.Hue,
                     color.Saturation,
                     color.Value);
+            
         }
 
         return array;
     }
+
+    private void PCUWarning()
+    {
+        WriteMessage();
+        WriteMessage("-=-=-=-=-=-=-=-=-=-=-=- WARNING -=-=-=-=-=-=-=-=-=-=-=-");
+        WriteMessage("This blueprint is too big to be used in SE2 with default PCU limit!");
+        WriteMessage("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+        WriteMessage();
+    }
+    
+    public void WriteMessage() => WriteMessage(string.Empty);
 
     public void WriteMessage(string message)
     {
