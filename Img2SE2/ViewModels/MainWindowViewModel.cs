@@ -151,20 +151,25 @@ public partial class MainWindowViewModel : ViewModelBase
             using var task = _file?.OpenReadAsync();
             if (task != null && await task is { } stream)
             {
-                if (HasMultiFrames)
+                using (var image = HasMultiFrames ? (await Image.LoadAsync(await task)).Frames.CloneFrame(1) : await Image.LoadAsync(await task))
                 {
-                    using (var image = await Image.LoadAsync(await task))
-                    {
-                        var firstFrame = image.Frames.CloneFrame(1);
-                        var frameStream = new MemoryStream();
-                        await firstFrame.SaveAsBmpAsync(frameStream);
-                        frameStream.Position = 0;
-                        SourceImage = new Bitmap(frameStream);
-                    }
-                }
-                else
-                {
-                    SourceImage = new Bitmap(stream);
+                    var btmStream = new MemoryStream();
+
+                    const int maxWidth = 360;
+                    int width = image.Width;
+                    
+                    const int maxHeight = 360;
+                    int height = image.Height;
+
+                    var ratio = Math.Min(maxWidth / (float)width, maxHeight / (float)height);
+
+                    image.Mutate(x => x.Resize((int)(width * ratio), (int)(height * ratio),
+                        KnownResamplers.NearestNeighbor));
+                    
+                    await image.SaveAsBmpAsync(btmStream);
+                    
+                    btmStream.Position = 0;
+                    SourceImage = new Bitmap(btmStream);
                 }
 
                 Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(SourceImage)));
@@ -210,7 +215,7 @@ public partial class MainWindowViewModel : ViewModelBase
             throw new FileNotFoundException();
 
         WriteMessage("Converting image with height map...");
-        
+
         try
         {
             var stream = await _file.OpenReadAsync();
@@ -247,7 +252,7 @@ public partial class MainWindowViewModel : ViewModelBase
             throw new FileNotFoundException();
 
         WriteMessage("Converting image...");
-        
+
         try
         {
             var stream = await _file.OpenReadAsync();
@@ -256,7 +261,7 @@ public partial class MainWindowViewModel : ViewModelBase
             var path = GetNewBlueprintFilePath(File?.Name);
 
             string[] pixels;
-            
+
             if (image.Frames.Count > 1)
             {
                 var colorData = ConvertImageTo3DArray(image);
@@ -267,7 +272,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 var colorData = ConvertImageTo2DArray(image);
                 pixels = Convert2DArrayToBlocks(colorData, SelectedSize);
             }
-            
+
             await using var textFile = System.IO.File.CreateText(path);
 
             var blocks = pixels.Where(a => !string.IsNullOrEmpty(a)).ToArray();
@@ -276,10 +281,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
             if (blocks.Length >= 400000)
                 PCUWarning();
-                
+
 
             foreach (var line in pixels)
-                if(!string.IsNullOrEmpty(line))
+                if (!string.IsNullOrEmpty(line))
                     await textFile.WriteLineAsync(line);
 
             WriteMessage("Blueprint generated successfully");
@@ -342,7 +347,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 array[index] = string.Empty;
                 continue;
             }
-            
+
             var color = new ColorHSV(colors[y, x]);
             var z = heightMap != null && new ColorHSV(heightMap[y, x]).Value > 0.5 ? 1 : 0;
             array[index] =
@@ -362,7 +367,7 @@ public partial class MainWindowViewModel : ViewModelBase
     static string[] Convert3DArrayToBlocks(Rgba32[,,] colors, BlockSize selectedBlock)
     {
         var array = new string[colors.Length];
-        
+
         for (int y = 0; y < colors.GetLength(0); y++)
         for (int x = 0; x < colors.GetLength(1); x++)
         for (int z = 0; z < colors.GetLength(2); z++)
@@ -374,7 +379,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 array[index] = string.Empty;
                 continue;
             }
-            
+
             var color = new ColorHSV(colors[y, x, z]);
             array[index] =
                 String.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|0|4|1|",
@@ -385,7 +390,6 @@ public partial class MainWindowViewModel : ViewModelBase
                     color.Hue,
                     color.Saturation,
                     color.Value);
-            
         }
 
         return array;
@@ -399,7 +403,7 @@ public partial class MainWindowViewModel : ViewModelBase
         WriteMessage("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
         WriteMessage();
     }
-    
+
     public void WriteMessage() => WriteMessage(string.Empty);
 
     public void WriteMessage(string message)

@@ -58,7 +58,7 @@
                                    BorderBrush="{Binding #PickButton.Background}">
 
                     <Grid>
-                        <Image Stretch="Uniform" MinWidth="360" MinHeight="360"
+                        <Image Stretch="None" MinWidth="360" MinHeight="360"
                                Source="{Binding SourceImage}" />
                         <Path Fill="{DynamicResource LogoForegroundBrush}"
                               IsVisible="{Binding SourceImage, Converter={x:Static ObjectConverters.IsNull}}"
