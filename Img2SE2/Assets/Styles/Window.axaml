@@ -1,0 +1,16 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector=":is(Window)">
+        <Setter Property="Background" Value="{DynamicResource Window-Background}" />
+    </Style>
+
+    <Style Selector=":is(Window)[ActualTransparencyLevel=Mica]">
+        <Setter Property="Background" Value="{DynamicResource Window-Background-Mica}" />
+    </Style>
+</Styles>

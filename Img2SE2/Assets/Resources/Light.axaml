@@ -2,31 +2,29 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     
     <SolidColorBrush x:Key='LogoForegroundBrush'>Black</SolidColorBrush>
-    
-    <Color x:Key="Primary">#95B0B7</Color>
-    <Color x:Key="Secondary">#627C83</Color>
+
+    <Color x:Key="Secondary">#5f5b5d</Color>
     <Color x:Key="Highlight">#E08B0E</Color>
     <Color x:Key="HighContrast">#FFFFFF</Color>
-    <Color x:Key="Disabled">#636363</Color>
-    <Color x:Key="Passive">#093B49</Color>
-    <Color x:Key="PassiveDark">#132122</Color>
-    <Color x:Key="Background">#00202B</Color>
-    <Color x:Key="BackgroundDark">#080e11</Color>
+    <Color x:Key="Disabled">#a3a1a2</Color>
+    <Color x:Key="Background">#fefefe</Color>
+    <Color x:Key="BackgroundLight">#fbfafb</Color>
     <Color x:Key="Black">#000000</Color>
     <Color x:Key="Warning">#FFDB1D</Color>
     <Color x:Key="Error">#FF1D08</Color>
+    <Color x:Key="HighContrast95">#80FFFFFF</Color>
     
     <!-- ********************* Buttons Brushes ********************* -->
     <!-- Button Background-->
     <SolidColorBrush x:Key="Button-Background" Color="{DynamicResource Background}" />
     <SolidColorBrush x:Key="Button-Background-Focus" Color="{DynamicResource Background}" />
-    <SolidColorBrush x:Key="Button-Background-Disabled" Color="{DynamicResource PassiveDark}" />
+    <SolidColorBrush x:Key="Button-Background-Disabled" Color="{DynamicResource Disabled}" />
     <SolidColorBrush x:Key="Button-Background-Active" Color="{DynamicResource Highlight}" />
     
     <!-- Menu Button Background -->
-    <SolidColorBrush x:Key="Menu-Button-Background" Color="{DynamicResource BackgroundDark}" />
-    <SolidColorBrush x:Key="Menu-Button-Background-Focus" Color="{DynamicResource BackgroundDark}" />
-    <SolidColorBrush x:Key="Menu-Button-Background-Disabled" Color="{DynamicResource BackgroundDark}" />
+    <SolidColorBrush x:Key="Menu-Button-Background" Color="{DynamicResource BackgroundLight}" />
+    <SolidColorBrush x:Key="Menu-Button-Background-Focus" Color="{DynamicResource BackgroundLight}" />
+    <SolidColorBrush x:Key="Menu-Button-Background-Disabled" Color="{DynamicResource BackgroundLight}" />
     <SolidColorBrush x:Key="Menu-Button-Background-Active" Color="{DynamicResource Highlight}" />
     
     <!-- Button Stroke-->
@@ -36,9 +34,13 @@
     <SolidColorBrush x:Key="Button-Stroke-Active" Color="{DynamicResource Highlight}" />
 
     <!-- Button Text-->
-    <SolidColorBrush x:Key="Button-Text" Color="{DynamicResource HighContrast}" />
-    <SolidColorBrush x:Key="Button-Text-Focus" Color="{DynamicResource HighContrast}" />
+    <SolidColorBrush x:Key="Button-Text" Color="{DynamicResource Black}" />
+    <SolidColorBrush x:Key="Button-Text-Focus" Color="{DynamicResource Black}" />
     <SolidColorBrush x:Key="Button-Text-Disabled" Color="{DynamicResource Secondary}" />
     <SolidColorBrush x:Key="Button-Text-Active" Color="{DynamicResource Black}" />
+    
+    <!-- Window Background -->
+    <SolidColorBrush x:Key="Window-Background" Color="{DynamicResource HighContrast}" />
+    <SolidColorBrush x:Key="Window-Background-Mica" Color="{DynamicResource HighContrast95}" />
     
 </ResourceDictionary>

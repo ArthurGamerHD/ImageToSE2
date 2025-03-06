@@ -15,6 +15,7 @@
     <Color x:Key="Black">#000000</Color>
     <Color x:Key="Warning">#FFDB1D</Color>
     <Color x:Key="Error">#FF1D08</Color>
+    <Color x:Key="Black95">#BF080808</Color>
     
     <!-- ********************* Buttons Brushes ********************* -->
     <!-- Button Background-->
@@ -40,5 +41,9 @@
     <SolidColorBrush x:Key="Button-Text-Focus" Color="{DynamicResource HighContrast}" />
     <SolidColorBrush x:Key="Button-Text-Disabled" Color="{DynamicResource Secondary}" />
     <SolidColorBrush x:Key="Button-Text-Active" Color="{DynamicResource Black}" />
+    
+    <!-- Window Background -->
+    <SolidColorBrush x:Key="Window-Background" Color="{DynamicResource Black}" />
+    <SolidColorBrush x:Key="Window-Background-Mica" Color="{DynamicResource Black95}" />
     
 </ResourceDictionary>

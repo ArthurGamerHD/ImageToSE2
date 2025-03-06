@@ -9,6 +9,7 @@
         x:Class="Img2SE2.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         x:CompileBindings="True"
+        TransparencyLevelHint="Mica"
         ExtendClientAreaToDecorationsHint="False"
         Width="550"
         Height="500"
@@ -98,7 +99,7 @@
 
         </Grid>
 
-        <GridSplitter Grid.Row="2" Grid.Column="0" Cursor="SizeNorthSouth" />
+        <GridSplitter Grid.Row="2" Grid.Column="0" Cursor="SizeNorthSouth" Background="Transparent" />
 
         <Grid Row="3" Column="0" Margin="28 0 28 32">
             <TextBox x:Name="MessageBox"
